@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "375733719840",
+    "project_id": "self-f1eb0",
+    "storage_bucket": "self-f1eb0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375733719840:android:7269bbbad49cc7b9efbd45",
+        "android_client_info": {
+          "package_name": "com.hnalovski.self"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrdDiUW8eFTrKxNf_ZQeomh4Z4XolqFrA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
