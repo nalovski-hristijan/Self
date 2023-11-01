@@ -1,19 +1,27 @@
 package com.hnalovski.self;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -29,10 +37,12 @@ import com.google.firebase.storage.UploadTask;
 import com.hnalovski.self.model.Journal;
 import com.hnalovski.self.util.JournalApi;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class PostJournalActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int GALLERY_CODE = 1;
+    private static final int RESULT_SPEECH = 2;
     private Button saveButton;
     private ProgressBar progressBar;
     private ImageView addPhotoButton;
@@ -40,7 +50,8 @@ public class PostJournalActivity extends AppCompatActivity implements View.OnCli
     private EditText thoughtsEditText;
     private TextView currentUserTextView;
     private ImageView imageView;
-
+    private ImageButton micTitleButton;
+    private ImageButton micThoughtsButton;
     private String currentUserId;
     private String currentUserName;
 
@@ -67,6 +78,8 @@ public class PostJournalActivity extends AppCompatActivity implements View.OnCli
         thoughtsEditText = findViewById(R.id.post_description_et);
         currentUserTextView = findViewById(R.id.post_username_textview);
         imageView = findViewById(R.id.post_imageView);
+        micTitleButton = findViewById(R.id.micTitle);
+        micThoughtsButton = findViewById(R.id.micThoughts);
 
         saveButton = findViewById(R.id.post_save_journal_button);
         saveButton.setOnClickListener(this);
@@ -82,6 +95,30 @@ public class PostJournalActivity extends AppCompatActivity implements View.OnCli
             currentUserTextView.setText(currentUserName);
 
         }
+
+        micTitleButton.setOnClickListener(view -> {
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
+            try {
+                micTitleLauncher.launch(intent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(getApplicationContext(), "Your device doesn't support Speech to Text", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+        });
+
+        micThoughtsButton.setOnClickListener(view -> {
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
+            try {
+                micThoughtsLauncher.launch(intent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(getApplicationContext(), "Your device doesn't support Speech to Text", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+        });
 
 
         authStateListener = firebaseAuth -> {
@@ -105,8 +142,7 @@ public class PostJournalActivity extends AppCompatActivity implements View.OnCli
         } else if (view.getId() == R.id.postCameraButton) {
             Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
             galleryIntent.setType("image/*");
-            startActivityForResult(galleryIntent, GALLERY_CODE);
-
+            resultLauncher.launch(galleryIntent);
         }
     }
 
@@ -160,16 +196,27 @@ public class PostJournalActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == GALLERY_CODE && resultCode == RESULT_OK) {
-            if (data != null) {
-                imageUri = data.getData();
-                imageView.setImageURI(imageUri);
-            }
-        }
-    }
+
+    ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), n -> {
+        imageUri = n.getData().getData();
+        imageView.setImageURI(imageUri);
+    });
+
+    ActivityResultLauncher<Intent> micTitleLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        assert o.getData() != null;
+        ArrayList<String> text = o.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+        titleEditText.setText(text.get(0));
+    });
+
+    ActivityResultLauncher<Intent> micThoughtsLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        ArrayList<String> text = o.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+        thoughtsEditText.setText(text.get(0));
+    });
+
+
+
+
+
 
     @Override
     protected void onStart() {
