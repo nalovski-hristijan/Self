@@ -1,7 +1,6 @@
 package com.hnalovski.self.ui;
 
 import android.content.Context;
-import android.content.Intent;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;

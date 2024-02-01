@@ -1,9 +1,5 @@
 package com.hnalovski.self;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -14,18 +10,13 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.hnalovski.self.util.JournalApi;
 
 public class LoginActivity extends AppCompatActivity {
@@ -59,15 +50,11 @@ public class LoginActivity extends AppCompatActivity {
         loginButton = findViewById(R.id.email_sign_in_button);
         createAccButton = findViewById(R.id.create_acct_button_login);
 
-        loginButton.setOnClickListener(view -> {
+        loginButton.setOnClickListener(view ->
+                loginEmailPasswordUser(emailAdress.getText().toString(), password.getText().toString()));
 
-            loginEmailPasswordUser(emailAdress.getText().toString(), password.getText().toString());
-
-        });
-
-        createAccButton.setOnClickListener(view -> {
-            startActivity(new Intent(LoginActivity.this, CreateAccountActivity.class));
-        });
+        createAccButton.setOnClickListener(view ->
+                startActivity(new Intent(LoginActivity.this, CreateAccountActivity.class)));
 
     }
 
@@ -84,7 +71,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 collectionReference.whereEqualTo("userId", currentUserId).addSnapshotListener((value, error) -> {
 
-                    if (error != null) {}
+
 
                     assert value != null;
                     if (!value.isEmpty()) {
@@ -106,10 +93,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 });
 
-            }).addOnFailureListener(e -> {
-                progressBar.setVisibility(View.INVISIBLE);
-
-            });
+            }).addOnFailureListener(e ->
+                    progressBar.setVisibility(View.INVISIBLE));
 
         } else {
             progressBar.setVisibility(View.INVISIBLE);

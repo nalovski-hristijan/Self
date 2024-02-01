@@ -1,13 +1,5 @@
 package com.hnalovski.self;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
@@ -23,17 +15,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.hnalovski.self.model.Journal;
 import com.hnalovski.self.util.JournalApi;
 
@@ -121,14 +113,8 @@ public class PostJournalActivity extends AppCompatActivity implements View.OnCli
         });
 
 
-        authStateListener = firebaseAuth -> {
-            user = firebaseAuth.getCurrentUser();
-            if (user != null) {
-
-            } else {
-
-            }
-        };
+        authStateListener = firebaseAuth ->
+                user = firebaseAuth.getCurrentUser();
 
 
     }
@@ -159,37 +145,33 @@ public class PostJournalActivity extends AppCompatActivity implements View.OnCli
                     .child("my_image_" + Timestamp.now().getSeconds());
 
             filepath.putFile(imageUri)
-                    .addOnSuccessListener(taskSnapshot -> {
+                    .addOnSuccessListener(taskSnapshot ->
 
 
-                        filepath.getDownloadUrl().addOnSuccessListener(uri -> {
+                            filepath.getDownloadUrl().addOnSuccessListener(uri -> {
 
-                            String imageUrl = uri.toString();
-                            //Journal object
-                            Journal journal = new Journal();
-                            journal.setTitle(title);
-                            journal.setThought(thoughts);
-                            journal.setImageUrl(imageUrl);
-                            journal.setTimeAdded(new Timestamp(new Date()));
-                            journal.setUserName(currentUserName);
-                            journal.setUserId(currentUserId);
+                        String imageUrl = uri.toString();
+                        //Journal object
+                        Journal journal = new Journal();
+                        journal.setTitle(title);
+                        journal.setThought(thoughts);
+                        journal.setImageUrl(imageUrl);
+                        journal.setTimeAdded(new Timestamp(new Date()));
+                        journal.setUserName(currentUserName);
+                        journal.setUserId(currentUserId);
 
-                            //collection reference
-                            collectionReference.add(journal).addOnSuccessListener(documentReference -> {
+                        //collection reference
+                        collectionReference.add(journal).addOnSuccessListener(documentReference -> {
 
-                                progressBar.setVisibility(View.INVISIBLE);
-                                startActivity(new Intent(PostJournalActivity.this, JournalListActivity.class));
-                                finish();
-                            }).addOnFailureListener(e -> {
-
-                            });
+                            progressBar.setVisibility(View.INVISIBLE);
+                            startActivity(new Intent(PostJournalActivity.this, JournalListActivity.class));
+                            finish();
+                        }).addOnFailureListener(e -> {
 
                         });
 
-
-                    }).addOnFailureListener(e -> {
-                        progressBar.setVisibility(View.INVISIBLE);
-                    });
+                    })).addOnFailureListener(e ->
+                            progressBar.setVisibility(View.INVISIBLE));
         } else {
 
             progressBar.setVisibility(View.INVISIBLE);
