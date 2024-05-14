@@ -180,6 +180,7 @@ public class PostJournalActivity extends AppCompatActivity implements View.OnCli
 
 
     ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), n -> {
+        assert n.getData() != null;
         imageUri = n.getData().getData();
         imageView.setImageURI(imageUri);
     });
@@ -187,11 +188,14 @@ public class PostJournalActivity extends AppCompatActivity implements View.OnCli
     ActivityResultLauncher<Intent> micTitleLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
         assert o.getData() != null;
         ArrayList<String> text = o.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+        assert text != null;
         titleEditText.setText(text.get(0));
     });
 
     ActivityResultLauncher<Intent> micThoughtsLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        assert o.getData() != null;
         ArrayList<String> text = o.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+        assert text != null;
         thoughtsEditText.setText(text.get(0));
     });
 

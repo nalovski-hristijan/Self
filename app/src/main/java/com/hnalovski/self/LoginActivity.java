@@ -10,8 +10,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -60,45 +62,47 @@ public class LoginActivity extends AppCompatActivity {
 
     private void loginEmailPasswordUser(String email, String pwd) {
         progressBar.setVisibility(View.VISIBLE);
+
         if (!TextUtils.isEmpty(email) && !TextUtils.isEmpty(pwd)) {
 
             firebaseAuth.signInWithEmailAndPassword(email, pwd).addOnCompleteListener(task -> {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                assert user != null;
-                String currentUserId = user.getUid();
+                if (task.isSuccessful()) {
+                    FirebaseUser user = firebaseAuth.getCurrentUser();
+                    assert user != null;
+                    String currentUserId = user.getUid();
 
+                    collectionReference.whereEqualTo("userId", currentUserId).addSnapshotListener((value, error) -> {
+                        assert value != null;
 
+                        if (!value.isEmpty()) {
+                            progressBar.setVisibility(View.INVISIBLE);
 
-                collectionReference.whereEqualTo("userId", currentUserId).addSnapshotListener((value, error) -> {
+                            for (QueryDocumentSnapshot snapshot : value) {
+                                JournalApi journalApi = JournalApi.getInstance();
+                                journalApi.setUsername(snapshot.getString("username"));
+                                journalApi.setUserId(snapshot.getString("userId"));
 
-
-
-                    assert value != null;
-                    if (!value.isEmpty()) {
-
-                        progressBar.setVisibility(View.INVISIBLE);
-
-
-                        for (QueryDocumentSnapshot snapshot : value) {
-                            JournalApi journalApi = JournalApi.getInstance();
-                            journalApi.setUsername(snapshot.getString("username"));
-                            journalApi.setUserId(snapshot.getString("userId"));
-
-                            startActivity(new Intent(LoginActivity.this, PostJournalActivity.class));
-
+                                startActivity(new Intent(this, PostJournalActivity.class));
+                            }
+                        } else {
+                            progressBar.setVisibility(View.INVISIBLE);
+                            Toast.makeText(LoginActivity.this, "No user data available.", Toast.LENGTH_SHORT).show();
                         }
+                    });
 
-
-                    }
-
-                });
-
-            }).addOnFailureListener(e ->
-                    progressBar.setVisibility(View.INVISIBLE));
+                } else {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    Toast.makeText(this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(e -> {
+                progressBar.setVisibility(View.INVISIBLE);
+                Toast.makeText(this, "Email or Password is incorrect", Toast.LENGTH_SHORT).show();
+            });
 
         } else {
             progressBar.setVisibility(View.INVISIBLE);
-            Toast.makeText(LoginActivity.this, "Please enter email and password", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Please enter email and password", Toast.LENGTH_LONG).show();
         }
     }
+
 }

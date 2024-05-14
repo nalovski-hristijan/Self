@@ -94,7 +94,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                             currentUser = firebaseAuth.getCurrentUser();
                             String currentUserId = firebaseAuth.getUid();
 
-                            //create a map to creae a user in user collection
+                            //create a map to create a user in user collection
                             Map<String, String> userObj = new HashMap<>();
                             userObj.put("userId", currentUserId);
                             userObj.put("username", username);
